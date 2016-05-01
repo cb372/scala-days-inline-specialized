@@ -10,21 +10,11 @@ class MyNotVerySpecialMap[A] {
   def get(key: String): Option[A] = None
 }
 
-object Specialisation {
+object Test {
 
-  def main(args: Array[String]) = {
-    val x: Int = 123
-    val hello: String = "hello"
-
+  def foo(): Unit = {
     val map1 = new MySpecialMap[Int]
-    val map2 = new MySpecialMap[String]
-    map1.put("foo", x)
-    map2.put("bar", hello)
-
-    val map3 = new MyNotVerySpecialMap[Int]
-    val map4 = new MyNotVerySpecialMap[String]
-    map3.put("foo", x)
-    map4.put("bar", hello)
+    map1.put("key", 123)
   }
 
 }
