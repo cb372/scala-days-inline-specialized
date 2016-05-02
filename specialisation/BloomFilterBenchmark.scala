@@ -45,7 +45,7 @@ object SpecializedHashFunctions {
  * @param m the size of the bitset to use
  * @param k the number of bits to set for each element added
  */
-class BloomFilter[A](m: Int, k: Int)(implicit hashFunctions: HashFunctions[A]) {
+final class BloomFilter[A](m: Int, k: Int)(implicit hashFunctions: HashFunctions[A]) {
 
   private val bits = new BitSet(m)
 
@@ -70,8 +70,8 @@ class BloomFilter[A](m: Int, k: Int)(implicit hashFunctions: HashFunctions[A]) {
    */
   def query(value: A): Boolean = {
     var x = hashFunctions.alpha(value) % m
-    if (!bits(x)) return false
     var y = hashFunctions.beta(value) % m
+    if (!bits(x)) return false
     for (i <- 1 until k) {
       x = (x + y) % m
       y = (y + i) % m
@@ -82,7 +82,7 @@ class BloomFilter[A](m: Int, k: Int)(implicit hashFunctions: HashFunctions[A]) {
 
 }
 
-class SpecializedBloomFilter[@specialized(Int) A](m: Int, k: Int)(implicit hashFunctions: SpecializedHashFunctions[A]) {
+final class SpecializedBloomFilter[@specialized(Int) A](m: Int, k: Int)(implicit hashFunctions: SpecializedHashFunctions[A]) {
 
   private val bits = new BitSet(m)
 
@@ -99,8 +99,8 @@ class SpecializedBloomFilter[@specialized(Int) A](m: Int, k: Int)(implicit hashF
 
   def query(value: A): Boolean = {
     var x = hashFunctions.alpha(value) % m
-    if (!bits(x)) return false
     var y = hashFunctions.beta(value) % m
+    if (!bits(x)) return false
     for (i <- 1 until k) {
       x = (x + y) % m
       y = (y + i) % m
@@ -115,23 +115,23 @@ class SpecializedBloomFilter[@specialized(Int) A](m: Int, k: Int)(implicit hashF
 @State(Scope.Thread)
 class BloomFilterBenchmark {
 
-  val bloomFilter = new BloomFilter[Int](m = 2048, k = 10)
-  val specializedBloomFilter = new SpecializedBloomFilter[Int](m = 2048, k = 10)
+  val bloomFilter = new BloomFilter[Int](m = 65536, k = 10)
+  val specializedBloomFilter = new SpecializedBloomFilter[Int](m = 65536, k = 10)
 
   @Benchmark
   @BenchmarkMode(Array(Mode.AverageTime))
   @OutputTimeUnit(TimeUnit.MICROSECONDS)
   def unspecialized(bh: Blackhole): Unit = {
-    bloomFilter.add(scala.util.Random.nextInt())
-    bh.consume(bloomFilter.query(scala.util.Random.nextInt()))
+    bloomFilter.add(42)
+    bh.consume(bloomFilter.query(123))
   }
 
   @Benchmark
   @BenchmarkMode(Array(Mode.AverageTime))
   @OutputTimeUnit(TimeUnit.MICROSECONDS)
   def specialized(bh: Blackhole): Unit = {
-    specializedBloomFilter.add(scala.util.Random.nextInt())
-    bh.consume(specializedBloomFilter.query(scala.util.Random.nextInt()))
+    specializedBloomFilter.add(42)
+    bh.consume(specializedBloomFilter.query(123))
   }
 
 }
